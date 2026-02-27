@@ -2,11 +2,12 @@
 #define LCD821LB_H_
 
 #include <Arduino.h>
+#include <pgmspace.h>
 
 #define SEGMENT_COUNT 10
 
 static const char SEGMENT_CHARS[] PROGMEM = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F', ',', 'l', 'P', '-', ' '};
-static const byte SEGMENT_CODES[] PROGMEM = {10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 0};
+static const byte SEGMENT_CODES[] PROGMEM = { 10,  1 ,  2 ,  3 ,  4 ,  5 ,  6 ,  7 ,  8 ,  9 ,  11, 12 , 13 , 14 , 15 , 0};
 static const byte SEGMENT_VALUES_COUNT = 16;
 
 #define NON_EXISTING_CHARACTER_CODE 255
@@ -20,7 +21,7 @@ public:
     void clear();
     void print(const char *str, bool leftPadded = false);
     void print(signed long long value, bool leftPadded = false);
-    void print(double value, int precision = 3, bool leftPadded = false);
+    void print(double value, byte precision = 3, bool leftPadded = false);
     void showClock();
     void startTimer();
 

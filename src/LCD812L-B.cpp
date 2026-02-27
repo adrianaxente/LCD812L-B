@@ -71,25 +71,23 @@ void LCD821LB::print(signed long long value, bool leftPadded)
     *p = '\0'; // Null terminator
 
 #else
-    snprintf(str, sizeof(str), "%" PRId64, value);
+    snprintf(str, sizeof(str), "%lld", value);
 #endif
 
     shiftString(str, leftPadded);
 }
 
-void LCD821LB::print(double value, int precision, bool leftPadded)
+void LCD821LB::print(double value, byte precision, bool leftPadded)
 {
     char str[25];
 
 #if defined(ARDUINO_ARCH_AVR)
     // This code only exists when compiling for AVR
     dtostrf(value, 0, precision, str);
-#elif defined(ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_RP2040)
-    // This code only exists when compiling for ESP
-    snprintf(str, sizeof(str), "%.*f", precision, value);
 #else
-    // Fallback for other platforms (ARM, etc.)
-    snprintf(str, sizeof(str), "%f", value);
+    // This works on ESP32, ESP8266, and Google Test (Desktop)
+    // We cast precision to int because snprintf expects an int for '*'
+    snprintf(str, sizeof(str), "%.*f", precision, value);
 #endif
 
     char *ptr = strchr(str, '.');
@@ -103,7 +101,14 @@ void LCD821LB::print(double value, int precision, bool leftPadded)
 
 void LCD821LB::showClock()
 {
-    digitalWrite(_hks_p, HIGH);
+    if (digitalRead(_hks_p) == LOW)
+    {
+        digitalWrite(_hks_p, HIGH);
+        delay(50);
+#ifdef DEBUG
+        Serial.println(F("HKS HIGH"));
+#endif
+    }
 }
 
 void LCD821LB::startTimer()
@@ -157,7 +162,7 @@ void LCD821LB::shiftString(const char *str, bool leftPadded)
 #endif
     }
 
-    byte count = strlen(str);
+    byte count = str != nullptr ? strlen(str) : 0;
 
     if (count > SEGMENT_COUNT)
     {
